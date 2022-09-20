@@ -725,7 +725,7 @@ open class ZLCustomCamera: UIViewController, CAAnimationDelegate {
     }
     
     @objc private func editImage() {
-        guard ZLPhotoConfiguration.default().allowEditImage, let image = takedImage else {
+        guard ZLPhotoConfiguration.default().allowEditAfterTakePhoto, let image = takedImage else {
             return
         }
         ZLEditImageViewController.showEditImageVC(parentVC: self, image: image) { [weak self] in

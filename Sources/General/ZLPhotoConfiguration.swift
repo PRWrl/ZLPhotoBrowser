@@ -126,7 +126,9 @@ public class ZLPhotoConfiguration: NSObject {
             pri_allowEditImage = newValue
         }
     }
-    
+
+    @objc public var allowEditAfterTakePhoto: Bool = false
+
     /// - warning: The video can only be edited when no photos are selected, or only one video is selected, and the selection callback is executed immediately after editing is completed.
     var pri_allowEditVideo = false
     @objc public var allowEditVideo: Bool {
@@ -170,7 +172,10 @@ public class ZLPhotoConfiguration: NSObject {
     
     /// If true, you can drag select photo when preview selection style. Defaults to false.
     @objc public var allowDragSelect = false
-    
+
+    /// Allow select full image. Defaults to false.
+    @objc public var allowSelectWatermark = false
+
     /// Allow select full image. Defaults to true.
     @objc public var allowSelectOriginal = true
     

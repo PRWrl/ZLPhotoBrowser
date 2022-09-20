@@ -111,7 +111,9 @@ public class ZLPhotoPreviewSheet: UIView {
     private var senderTabBarIsHidden: Bool?
     
     private var baseViewHeight: CGFloat = 0
-    
+
+    private var shouldWatermark = false
+
     private var isSelectOriginal = false
     
     private var panBeginPoint: CGPoint = .zero
@@ -130,7 +132,8 @@ public class ZLPhotoPreviewSheet: UIView {
     /// block params
     ///  - params1: result models
     ///  - params2: is full image
-    @objc public var selectImageBlock: (([ZLResultModel], Bool) -> Void)?
+    ///  - params3: should watermark
+    @objc public var selectImageBlock: (([ZLResultModel], Bool, Bool) -> Void)?
     
     /// Callback for photos that failed to parse
     /// block params
@@ -545,7 +548,7 @@ public class ZLPhotoPreviewSheet: UIView {
     
     private func requestSelectPhoto(viewController: UIViewController? = nil) {
         guard !arrSelectedModels.isEmpty else {
-            selectImageBlock?([], isSelectOriginal)
+            selectImageBlock?([], isSelectOriginal, shouldWatermark)
             hide()
             viewController?.dismiss(animated: true, completion: nil)
             return
@@ -577,12 +580,13 @@ public class ZLPhotoPreviewSheet: UIView {
         hud.show(timeout: ZLPhotoConfiguration.default().timeout)
         
         let isOriginal = config.allowSelectOriginal ? isSelectOriginal : config.alwaysRequestOriginal
+        let shouldWatermark = config.allowSelectWatermark ? shouldWatermark : false
         
         let callback = { [weak self] (sucModels: [ZLResultModel], errorAssets: [PHAsset], errorIndexs: [Int]) in
             hud.hide()
             
             func call() {
-                self?.selectImageBlock?(sucModels, isOriginal)
+                self?.selectImageBlock?(sucModels, isOriginal, shouldWatermark)
                 if !errorAssets.isEmpty {
                     self?.selectImageRequestErrorBlock?(errorAssets, errorIndexs)
                 }
@@ -672,6 +676,7 @@ public class ZLPhotoPreviewSheet: UIView {
         let nav = getImageNav(rootViewController: vc)
         vc.backBlock = { [weak self, weak nav] in
             guard let `self` = self else { return }
+            self.shouldWatermark = nav?.shouldWatermark ?? false
             self.isSelectOriginal = nav?.isSelectedOriginal ?? false
             self.arrSelectedModels.removeAll()
             self.arrSelectedModels.append(contentsOf: nav?.arrSelectedModels ?? [])
@@ -757,6 +762,7 @@ public class ZLPhotoPreviewSheet: UIView {
         let nav = ZLImageNavController(rootViewController: rootViewController)
         nav.modalPresentationStyle = .fullScreen
         nav.selectImageBlock = { [weak self, weak nav] in
+            self?.shouldWatermark = nav?.shouldWatermark ?? false
             self?.isSelectOriginal = nav?.isSelectedOriginal ?? false
             self?.arrSelectedModels.removeAll()
             self?.arrSelectedModels.append(contentsOf: nav?.arrSelectedModels ?? [])

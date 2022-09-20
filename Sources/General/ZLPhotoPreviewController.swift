@@ -114,6 +114,19 @@ class ZLPhotoPreviewController: UIViewController {
         btn.contentHorizontalAlignment = .left
         return btn
     }()
+
+    private lazy var watermarkBtn: UIButton = {
+        let btn = createBtn(localLanguageTextValue(.watermark), #selector(watermarkClick))
+        btn.titleLabel?.lineBreakMode = .byCharWrapping
+        btn.titleLabel?.numberOfLines = 2
+        btn.contentHorizontalAlignment = .left
+        btn.setImage(.zl.getImage("zl_btn_original_circle"), for: .normal)
+        btn.setImage(.zl.getImage("zl_btn_original_selected"), for: .selected)
+        btn.setImage(.zl.getImage("zl_btn_original_selected"), for: [.selected, .highlighted])
+        btn.adjustsImageWhenHighlighted = false
+        btn.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        return btn
+    }()
     
     private lazy var originalBtn: UIButton = {
         let btn = createBtn(localLanguageTextValue(.originalPhoto), #selector(originalPhotoClick))
@@ -273,16 +286,28 @@ class ZLPhotoPreviewController: UIViewController {
         let btnY: CGFloat = showSelPhotoPreview ? ZLPhotoPreviewController.selPhotoPreviewH + ZLLayout.bottomToolBtnY : ZLLayout.bottomToolBtnY
         
         let btnMaxWidth = (bottomView.bounds.width - 30) / 3
-        
+
+        var currentX: CGFloat = 15
+
         let editTitle = localLanguageTextValue(.edit)
-        let editBtnW = editTitle.zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 30)).width
-        editBtn.frame = CGRect(x: 15, y: btnY, width: min(btnMaxWidth, editBtnW), height: btnH)
-        
+        var editBtnW = editTitle.zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 30)).width
+        editBtnW = min(btnMaxWidth, editBtnW)
+        editBtn.frame = CGRect(x: currentX, y: btnY, width: editBtnW, height: btnH)
+
+        currentX += editBtnW + 15
+
         let originTitle = localLanguageTextValue(.originalPhoto)
         let originBtnW = originTitle.zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 30)).width + 30
         let originBtnMaxW = min(btnMaxWidth, originBtnW)
-        originalBtn.frame = CGRect(x: (bottomView.bounds.width - originBtnMaxW) / 2 - 5, y: btnY, width: originBtnMaxW, height: btnH)
-        
+        originalBtn.frame = CGRect(x: currentX, y: btnY, width: originBtnMaxW, height: btnH)
+
+        currentX += originBtnW + 15
+
+        let watermarkTitle = localLanguageTextValue(.watermark)
+        let watermarkBtnW = watermarkTitle.zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 30)).width + 30
+        let watermarkBtnMaxW = min(btnMaxWidth, watermarkBtnW)
+        watermarkBtn.frame = CGRect(x: currentX, y: btnY, width: watermarkBtnMaxW, height: btnH)
+
         let selCount = (navigationController as? ZLImageNavController)?.arrSelectedModels.count ?? 0
         var doneTitle = localLanguageTextValue(.done)
         if ZLPhotoConfiguration.default().showSelectCountOnDoneBtn, selCount > 0 {
@@ -330,7 +355,11 @@ class ZLPhotoPreviewController: UIViewController {
         
         editBtn.isHidden = (!config.allowEditImage && !config.allowEditVideo)
         bottomView.addSubview(editBtn)
-        
+
+        watermarkBtn.isHidden = !(config.allowSelectWatermark && config.allowSelectImage)
+        watermarkBtn.isSelected = (navigationController as? ZLImageNavController)?.shouldWatermark ?? false
+        bottomView.addSubview(watermarkBtn)
+
         originalBtn.isHidden = !(config.allowSelectOriginal && config.allowSelectImage)
         originalBtn.isSelected = (navigationController as? ZLImageNavController)?.isSelectedOriginal ?? false
         bottomView.addSubview(originalBtn)
@@ -455,7 +484,12 @@ class ZLPhotoPreviewController: UIViewController {
             }
         }
         editBtn.isHidden = hideEditBtn
-        
+
+        if ZLPhotoConfiguration.default().allowSelectWatermark,
+            ZLPhotoConfiguration.default().allowSelectImage {
+            watermarkBtn.isHidden = !((currentModel.type == .image) || (currentModel.type == .livePhoto && !config.allowSelectLivePhoto) || (currentModel.type == .gif && !config.allowSelectGif))
+        }
+
         if ZLPhotoConfiguration.default().allowSelectOriginal,
            ZLPhotoConfiguration.default().allowSelectImage {
             originalBtn.isHidden = !((currentModel.type == .image) || (currentModel.type == .livePhoto && !config.allowSelectLivePhoto) || (currentModel.type == .gif && !config.allowSelectGif))
@@ -552,7 +586,13 @@ class ZLPhotoPreviewController: UIViewController {
             }
         }
     }
-    
+
+    @objc func watermarkClick() {
+        watermarkBtn.isSelected.toggle()
+        let nav = (navigationController as? ZLImageNavController)
+        nav?.shouldWatermark = watermarkBtn.isSelected
+    }
+
     @objc private func originalPhotoClick() {
         originalBtn.isSelected.toggle()
         

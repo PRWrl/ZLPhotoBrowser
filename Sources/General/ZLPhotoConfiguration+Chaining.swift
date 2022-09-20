@@ -106,6 +106,12 @@ public extension ZLPhotoConfiguration {
         allowEditImage = value
         return self
     }
+
+    @discardableResult
+    func allowEditAfterTakePhoto(_ value: Bool) -> ZLPhotoConfiguration {
+        allowEditAfterTakePhoto = value
+        return self
+    }
     
     @discardableResult
     func allowEditVideo(_ value: Bool) -> ZLPhotoConfiguration {
@@ -170,6 +176,12 @@ public extension ZLPhotoConfiguration {
     @discardableResult
     func allowDragSelect(_ value: Bool) -> ZLPhotoConfiguration {
         allowDragSelect = value
+        return self
+    }
+
+    @discardableResult
+    func allowSelectWatermark(_ value: Bool) -> ZLPhotoConfiguration {
+        allowSelectWatermark = value
         return self
     }
     

@@ -28,7 +28,9 @@ import UIKit
 import Photos
 
 class ZLImageNavController: UINavigationController {
-    
+
+    var shouldWatermark: Bool = false
+
     var isSelectedOriginal: Bool = false
     
     var arrSelectedModels: [ZLPhotoModel] = []

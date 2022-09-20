@@ -71,6 +71,21 @@ class ZLThumbnailViewController: UIViewController {
         btn.isHidden = !ZLPhotoConfiguration.default().showPreviewButtonInAlbum
         return btn
     }()
+
+    private lazy var watermarkBtn: UIButton = {
+        let btn = createBtn(localLanguageTextValue(.watermark), #selector(watermarkClick))
+        btn.titleLabel?.lineBreakMode = .byCharWrapping
+        btn.titleLabel?.numberOfLines = 2
+        btn.contentHorizontalAlignment = .left
+        btn.setImage(.zl.getImage("zl_btn_original_circle"), for: .normal)
+        btn.setImage(.zl.getImage("zl_btn_original_selected"), for: .selected)
+        btn.setImage(.zl.getImage("zl_btn_original_selected"), for: [.selected, .highlighted])
+        btn.adjustsImageWhenHighlighted = false
+        btn.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        btn.isHidden = !(ZLPhotoConfiguration.default().allowSelectWatermark && ZLPhotoConfiguration.default().allowSelectImage)
+        btn.isSelected = (navigationController as? ZLImageNavController)?.shouldWatermark ?? false
+        return btn
+    }()
     
     private lazy var originalBtn: UIButton = {
         let btn = createBtn(localLanguageTextValue(.originalPhoto), #selector(originalPhotoClick))
@@ -312,10 +327,15 @@ class ZLThumbnailViewController: UIViewController {
             let btnMaxWidth = (bottomView.bounds.width - 30) / 3
             
             let btnY = showLimitAuthTipsView ? ZLLimitedAuthorityTipsView.height + ZLLayout.bottomToolBtnY : ZLLayout.bottomToolBtnY
+            var currentX: CGFloat = 15
+
             let previewTitle = localLanguageTextValue(.preview)
-            let previewBtnW = previewTitle.zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 30)).width
-            previewBtn.frame = CGRect(x: 15, y: btnY, width: min(btnMaxWidth, previewBtnW), height: btnH)
-            
+            var previewBtnW = previewTitle.zl.boundingRect(font: ZLLayout.bottomToolTitleFont, limitSize: CGSize(width: CGFloat.greatestFiniteMagnitude, height: 30)).width
+            previewBtnW = min(btnMaxWidth, previewBtnW)
+            previewBtn.frame = CGRect(x: currentX, y: btnY, width: previewBtnW, height: btnH)
+
+            currentX += previewBtnW + 15
+
             let originalTitle = localLanguageTextValue(.originalPhoto)
             let originBtnW = originalTitle.zl.boundingRect(
                 font: ZLLayout.bottomToolTitleFont,
@@ -325,8 +345,20 @@ class ZLThumbnailViewController: UIViewController {
                 )
             ).width + (originalBtn.currentImage?.size.width ?? 18) + 12
             let originBtnMaxW = min(btnMaxWidth, originBtnW)
-            originalBtn.frame = CGRect(x: (bottomView.bounds.width - originBtnMaxW) / 2 - 5, y: btnY, width: originBtnMaxW, height: btnH)
-            
+            originalBtn.frame = CGRect(x: currentX, y: btnY, width: originBtnMaxW, height: btnH)
+
+            currentX += originBtnW + 15
+
+            let watermarkTitle = localLanguageTextValue(.watermark)
+            let watermarkBtnW = watermarkTitle.zl.boundingRect(
+                font: ZLLayout.bottomToolTitleFont,
+                limitSize: CGSize(
+                    width: CGFloat.greatestFiniteMagnitude,
+                    height: 30
+                )).width + 30
+            let watermarkBtnMaxW = min(btnMaxWidth, watermarkBtnW)
+            watermarkBtn.frame = CGRect(x: currentX, y: btnY, width: watermarkBtnMaxW, height: btnH)
+
             refreshDoneBtnFrame()
         }
     }
@@ -350,6 +382,7 @@ class ZLThumbnailViewController: UIViewController {
         }
         
         bottomView.addSubview(previewBtn)
+        bottomView.addSubview(watermarkBtn)
         bottomView.addSubview(originalBtn)
         bottomView.addSubview(doneBtn)
         
@@ -479,7 +512,12 @@ class ZLThumbnailViewController: UIViewController {
         let vc = ZLPhotoPreviewController(photos: nav.arrSelectedModels, index: 0)
         show(vc, sender: nil)
     }
-    
+
+    @objc func watermarkClick() {
+        watermarkBtn.isSelected.toggle()
+        (navigationController as? ZLImageNavController)?.shouldWatermark = watermarkBtn.isSelected
+    }
+
     @objc private func originalPhotoClick() {
         originalBtn.isSelected.toggle()
         (navigationController as? ZLImageNavController)?.isSelectedOriginal = originalBtn.isSelected
@@ -723,6 +761,7 @@ class ZLThumbnailViewController: UIViewController {
             doneBtn.setTitle(doneTitle, for: .normal)
             doneBtn.backgroundColor = .zl.bottomToolViewBtnDisableBgColor
         }
+        watermarkBtn.isSelected = nav.shouldWatermark
         originalBtn.isSelected = nav.isSelectedOriginal
         refreshDoneBtnFrame()
     }

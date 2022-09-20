@@ -102,7 +102,10 @@ public struct ZLLocalLanguageKey: Hashable {
     
     /// Photos (照片)
     public static let photo = ZLLocalLanguageKey(rawValue: "photo")
-    
+
+    /// Watermark (水印)
+    public static let watermark = ZLLocalLanguageKey(rawValue: "watermark")
+
     /// Full Image (原图)
     public static let originalPhoto = ZLLocalLanguageKey(rawValue: "originalPhoto")
     
