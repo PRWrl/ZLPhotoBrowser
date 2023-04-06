@@ -59,7 +59,7 @@ If you only want to use the image edit feature, please move to [ZLImageEditor](h
  - Preview selection
  ```swift
  let ps = ZLPhotoPreviewSheet()
- ps.selectImageBlock = { [weak self] (images, assets, isOriginal) in
+ ps.selectImageBlock = { [weak self] results, isOriginal in
      // your code
  }
  ps.showPreview(animate: true, sender: self)
@@ -68,7 +68,7 @@ If you only want to use the image edit feature, please move to [ZLImageEditor](h
  - Library selection
  ```swift
  let ps = ZLPhotoPreviewSheet()
- ps.selectImageBlock = { [weak self] (images, assets, isOriginal) in
+ ps.selectImageBlock = { [weak self] results, isOriginal in
      // your code
  }
  ps.showPhotoLibrary(sender: self)
@@ -91,24 +91,30 @@ If you only want to use the image edit feature, please move to [ZLImageEditor](h
 ### <a id="ChangeLog"></a>Change Log
 > [More logs](https://github.com/longitachi/ZLPhotoBrowser/blob/master/CHANGELOG.md)
 ```
-● 4.3.6
+● 4.4.0
   Add:
-    Provide a method to save the PHAsset to local.
-    Updated the method of parsing GIF.
-  Fix:
-    Fixed crash in pop interactive transition.
-● 4.3.5
+    Limit the maximum number of frames of GIF images to avoid crashes caused by loading too many frames of GIFs, and provide a series of blocks to support custom implementation of GIF image playback.
+    Modify the UI effect of text input in the image editor.
+    Support set the default camera position.
+● 4.3.9
   Add:
-    Support custom alert style.
-    Improve the experience of image editor.
-● 4.3.4
+    Support for customizing the item spacing, row spacing, and column count of the thumbnail view controller.
+    Moves the camera configuration-related properties from ZLPhotoConfiguration to ZLCameraConfiguration.
+    Update the UI style of camera interface.
+    Support callback directly after taking picture.
+    Increase the maximum zoom ratio of stickers.
+● 4.3.8
+  Add:
+    Support direct callback after selecting thumbnail.
+    Add horizontal adjust slider.
   Fix:
-    Fixed a bug of the image editor.
+    Fix the bug of wrong size when merging videos.
+    Hide redo button when filtering or color adjusting.
 ...
 ```
 
 ### <a id="Languages"></a>Languages
-🇨🇳 Chinese, 🇺🇸 English, 🇯🇵 Japanese, 🇫🇷 French, 🇩🇪 German, 🇷🇺 Russian, 🇻🇳 Vietnamese, 🇰🇷 Korean, 🇲🇾 Malay, 🇮🇹 Italian, 🇮🇩 Indonesian, 🇪🇸 Spanish, 🇵🇹 Portuguese, 🇹🇷 Turkish.
+🇨🇳 Chinese, 🇺🇸 English, 🇯🇵 Japanese, 🇫🇷 French, 🇩🇪 German, 🇷🇺 Russian, 🇻🇳 Vietnamese, 🇰🇷 Korean, 🇲🇾 Malay, 🇮🇹 Italian, 🇮🇩 Indonesian, 🇪🇸 Spanish, 🇵🇹 Portuguese, 🇹🇷 Turkish, 🇸🇦 Arabic.
 
 ### <a id="Installation"></a>Installation
 There are four ways to use ZLPhotoBrowser in your project:

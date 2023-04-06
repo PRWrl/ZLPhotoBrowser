@@ -28,6 +28,7 @@ import UIKit
 import Photos
 
 class ZLThumbnailPhotoCell: UICollectionViewCell {
+    private lazy var containerView = UIView()
     
     private lazy var bottomShadowView = UIImageView(image: .zl.getImage("zl_shadow"))
     
@@ -84,7 +85,8 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
         let label = UILabel()
         label.layer.cornerRadius = 23.0 / 2
         label.layer.masksToBounds = true
-        label.textColor = .white
+        label.textColor = .zl.indexLabelTextColor
+        label.backgroundColor = .zl.indexLabelBgColor
         label.font = .zl.font(ofSize: 14)
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.5
@@ -124,15 +126,16 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
     
     func setupUI() {
         contentView.addSubview(imageView)
-        contentView.addSubview(coverView)
-        contentView.addSubview(btnSelect)
+        contentView.addSubview(containerView)
+        containerView.addSubview(coverView)
+        containerView.addSubview(btnSelect)
         btnSelect.addSubview(indexLabel)
-        contentView.addSubview(bottomShadowView)
+        containerView.addSubview(bottomShadowView)
         bottomShadowView.addSubview(videoTag)
         bottomShadowView.addSubview(livePhotoTag)
         bottomShadowView.addSubview(editImageTag)
         bottomShadowView.addSubview(descLabel)
-        contentView.addSubview(progressView)
+        containerView.addSubview(progressView)
         
         if ZLPhotoConfiguration.default().showSelectedBorder {
             layer.borderColor = UIColor.zl.selectedBorderColor.cgColor
@@ -141,6 +144,8 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
     
     override func layoutSubviews() {
         imageView.frame = bounds
+        
+        containerView.frame = bounds
         coverView.frame = bounds
         btnSelect.frame = CGRect(x: bounds.width - 30, y: 8, width: 23, height: 23)
         indexLabel.frame = btnSelect.bounds
@@ -161,7 +166,7 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
         
         btnSelect.layer.removeAllAnimations()
         if !btnSelect.isSelected, ZLPhotoConfiguration.default().animateSelectBtnWhenSelect {
-            btnSelect.layer.add(getSpringAnimation(), forKey: nil)
+            btnSelect.layer.add(ZLAnimationUtils.springAnimation(), forKey: nil)
         }
         
         selectedBlock?(btnSelect.isSelected)
@@ -175,8 +180,8 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
     }
     
     private func configureCell() {
-        if ZLPhotoConfiguration.default().cellCornerRadio > 0 {
-            layer.cornerRadius = ZLPhotoConfiguration.default().cellCornerRadio
+        if ZLPhotoUIConfiguration.default().cellCornerRadio > 0 {
+            layer.cornerRadius = ZLPhotoUIConfiguration.default().cellCornerRadio
             layer.masksToBounds = true
         }
         
@@ -224,8 +229,6 @@ class ZLThumbnailPhotoCell: UICollectionViewCell {
         btnSelect.isHidden = !showSelBtn
         btnSelect.isUserInteractionEnabled = showSelBtn
         btnSelect.isSelected = model.isSelected
-        
-        indexLabel.backgroundColor = .zl.indexLabelBgColor
         
         if model.isSelected {
             fetchBigImage()
